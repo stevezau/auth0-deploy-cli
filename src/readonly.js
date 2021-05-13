@@ -1,5 +1,5 @@
 import dotProp from 'dot-prop';
-
+import _ from 'lodash';
 // Filter out known read only fields during dump
 const readOnly = {
   guardianFactors: [
@@ -17,7 +17,8 @@ const readOnly = {
     'sandbox_versions_available',
     'flags.allow_changing_enable_sso',
     'flags.enable_sso',
-    'flags.disable_impersonation'
+    'flags.disable_impersonation',
+    'flags.remove_stale_idp_attributes'
   ],
   clients: [
     'client_secret',
@@ -77,5 +78,5 @@ export default function cleanAssets(assets, config) {
     }
   });
 
-  return cleaned;
+  return _.pickBy(cleaned, _.identity);
 }

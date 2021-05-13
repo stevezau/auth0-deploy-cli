@@ -3,12 +3,12 @@ import path from 'path';
 import { constants, loadFile } from 'auth0-source-control-extension-tools';
 
 import log from '../../../logger';
-import { getFiles, existsMustBeDir, loadJSON } from '../../../utils';
+import { getFiles, existsMustBeDir, dumpJSON, loadJSON } from '../../../utils';
 
 
 function parse(context) {
   const emailsFolder = path.join(context.filePath, constants.EMAIL_TEMPLATES_DIRECTORY);
-  if (!existsMustBeDir(emailsFolder)) return { emailTemplates: [] }; // Skip
+  if (!existsMustBeDir(emailsFolder)) return { emailTemplates: undefined }; // Skip
 
   const files = getFiles(emailsFolder, [ '.json', '.html' ]).filter(f => path.basename(f) !== 'provider.json');
 
@@ -57,8 +57,7 @@ async function dump(context) {
 
     // Dump template metadata
     const templateFile = path.join(templatesFolder, `${template.template}.json`);
-    log.info(`Writing ${templateFile}`);
-    fs.writeFileSync(templateFile, JSON.stringify({ ...template, body: `./${template.template}.html` }, null, 2));
+    dumpJSON(templateFile, { ...template, body: `./${template.template}.html` });
   });
 }
 

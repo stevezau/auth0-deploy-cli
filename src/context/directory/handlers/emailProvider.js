@@ -2,8 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import { constants } from 'auth0-source-control-extension-tools';
 
-import log from '../../../logger';
-import { existsMustBeDir, isFile, loadJSON } from '../../../utils';
+import { existsMustBeDir, isFile, dumpJSON, loadJSON } from '../../../utils';
 import { emailProviderDefaults } from '../../defaults';
 
 function parse(context) {
@@ -27,14 +26,17 @@ async function dump(context) {
 
   if (!emailProvider) return; // Skip, nothing to dump
 
-  // Add placeholder for credentials as they cannot be exported
-  emailProvider = emailProviderDefaults(emailProvider);
+  const excludedDefaults = context.assets.exclude.defaults || [];
+  if (!excludedDefaults.includes('emailProvider')) {
+    // Add placeholder for credentials as they cannot be exported
+    emailProvider = emailProviderDefaults(emailProvider);
+  }
+
   const emailsFolder = path.join(context.filePath, constants.EMAIL_TEMPLATES_DIRECTORY);
   fs.ensureDirSync(emailsFolder);
 
   const emailProviderFile = path.join(emailsFolder, 'provider.json');
-  log.info(`Writing ${emailProviderFile}`);
-  fs.writeFileSync(emailProviderFile, JSON.stringify(emailProvider, null, 2));
+  dumpJSON(emailProviderFile, emailProvider);
 }
 
 
